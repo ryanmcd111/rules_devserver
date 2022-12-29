@@ -2,5 +2,5 @@ load("//devserver:defs.bzl", "devserver")
 
 devserver(
     name = "serve",
-    port = 8080,
+    port = 8081,
 )

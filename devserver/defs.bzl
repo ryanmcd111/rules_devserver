@@ -5,5 +5,6 @@ def devserver(name, port):
             Label("@rules_devserver//devserver:main"), 
             Label("@rules_devserver//devserver:httplib")
         ],
+        args = ["--port=%d" % port],
         linkopts = ["-lpthread"],
     )
