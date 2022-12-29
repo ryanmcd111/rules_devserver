@@ -1,8 +1,11 @@
-cc_binary(
+filegroup(
+    name = "httplib",
+    srcs = glob(["httplib/httplib.h"]),
+    visibility = ["//visibility:public"]
+)
+
+filegroup(
     name = "main",
-    srcs = [
-        "main.cc", 
-        "httplib/httplib.h"
-    ],
-    linkopts = ["-lpthread"],
+    srcs = glob(["main.cc"]),
+    visibility = ["//visibility:public"],
 )
