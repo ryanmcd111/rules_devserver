@@ -4,7 +4,6 @@ def devserver(name, port, static_file, data = []):
         name = name,
         srcs = [
             Label("@rules_devserver//devserver:main"), 
-            Label("@rules_devserver//devserver:httplib")
         ],
         args = [
             "--port=%d" % port, 
