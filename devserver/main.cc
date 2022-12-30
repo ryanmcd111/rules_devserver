@@ -36,7 +36,7 @@ struct Arguments {
   std::string package_name;
 };
 
-std::string GetFileContents(const std::string &path) {
+std::string GetFileContents(const Path &path) {
   std::ifstream ifs(path);
   std::string content((std::istreambuf_iterator<char>(ifs)),
                       (std::istreambuf_iterator<char>()));
@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
   static_file_contents =
       AddDevserverLoaderToStaticFileContents(static_file_contents);
 
-  const std::map<std::string, std::string> path_to_contents = {
+  const std::map<Path, FileContents> path_to_contents = {
       {"/", static_file_contents}};
   json manifest = ComputeManifest(path_to_contents);
   DEBUG_LOG("manifest: " << manifest.dump() << "\n\n");
