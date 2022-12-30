@@ -1,5 +1,3 @@
-console.log("inside devserver_loader.js");
-
 setInterval(() => {
     fetch("/devserver/manifest")
         .then(function (response) {

@@ -5,8 +5,10 @@
 // #include "external/rules_devserver/devserver/httplib/httplib.h"
 // #include "external/rules_devserver/devserver/json/json.h"
 // #include "external/rules_devserver/devserver/md5/md5.h"
+// #include "external/rules_devserver/devserver/base64/base64.h"
 
 #include "devserver/argparse/argparse.h"
+#include "devserver/base64/base64.h"
 #include "devserver/httplib/httplib.h"
 #include "devserver/json/json.h"
 #include "devserver/md5/md5.h"
@@ -27,70 +29,6 @@ constexpr char kWorkspaceName[] = "rules_devserver";
 constexpr int kDefaultPort = 8080;
 constexpr char kHost[] = "localhost";
 
-/*
- * Base64 encoding/decoding (RFC1341)
- * Copyright (c) 2005-2011, Jouni Malinen <j@w1.fi>
- *
- * This software may be distributed under the terms of the BSD license.
- * See README for more details.
- */
-
-// 2016-12-12 - Gaspard Petit : Slightly modified to return a std::string
-// instead of a buffer allocated with malloc.
-
-#include <string>
-
-static const unsigned char base64_table[65] =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-/**
- * base64_encode - Base64 encode
- * @src: Data to be encoded
- * @len: Length of the data to be encoded
- * @out_len: Pointer to output length variable, or %NULL if not used
- * Returns: Allocated buffer of out_len bytes of encoded data,
- * or empty string on failure
- */
-std::string base64_encode(const unsigned char *src, size_t len) {
-  unsigned char *out, *pos;
-  const unsigned char *end, *in;
-
-  size_t olen;
-
-  olen = 4 * ((len + 2) / 3); /* 3-byte blocks to 4-byte */
-
-  if (olen < len) return std::string(); /* integer overflow */
-
-  std::string outStr;
-  outStr.resize(olen);
-  out = (unsigned char *)&outStr[0];
-
-  end = src + len;
-  in = src;
-  pos = out;
-  while (end - in >= 3) {
-    *pos++ = base64_table[in[0] >> 2];
-    *pos++ = base64_table[((in[0] & 0x03) << 4) | (in[1] >> 4)];
-    *pos++ = base64_table[((in[1] & 0x0f) << 2) | (in[2] >> 6)];
-    *pos++ = base64_table[in[2] & 0x3f];
-    in += 3;
-  }
-
-  if (end - in) {
-    *pos++ = base64_table[in[0] >> 2];
-    if (end - in == 1) {
-      *pos++ = base64_table[(in[0] & 0x03) << 4];
-      *pos++ = '=';
-    } else {
-      *pos++ = base64_table[((in[0] & 0x03) << 4) | (in[1] >> 4)];
-      *pos++ = base64_table[(in[1] & 0x0f) << 2];
-    }
-    *pos++ = '=';
-  }
-
-  return outStr;
-}
-
 struct Arguments {
   int32_t port;
   std::string static_file;
@@ -109,8 +47,8 @@ json ComputeManifest(const std::map<Path, FileContents> &path_to_contents) {
   json manifest;
 
   for (const auto &path_and_contents : path_to_contents) {
-    Path path = path_and_contents.first;
-    FileContents contents = path_and_contents.second;
+    const Path path = path_and_contents.first;
+    const FileContents contents = path_and_contents.second;
 
     picohash_ctx_t ctx;
     char digest[PICOHASH_MD5_DIGEST_LENGTH];
@@ -118,7 +56,8 @@ json ComputeManifest(const std::map<Path, FileContents> &path_to_contents) {
     picohash_init_md5(&ctx);
     picohash_update(&ctx, contents.c_str(), contents.size());
     picohash_final(&ctx, digest);
-    std::string digest_str(base64_encode(digest, PICOHASH_MD5_DIGEST_LENGTH));
+    const std::string digest_str(
+        base64_encode(digest, PICOHASH_MD5_DIGEST_LENGTH));
     manifest[path] = digest_str;
   }
 
@@ -230,7 +169,7 @@ int main(int argc, char **argv) {
   const std::map<std::string, std::string> path_to_contents = {
       {"/", static_file_contents}};
   json manifest = ComputeManifest(path_to_contents);
-  std::cout << "manifest: " << manifest.dump() << std::endl;
+  DEBUG_LOG("manifest: " << manifest.dump() << "\n\n");
 
   svr.Get("/", [&static_file_contents](const httplib::Request &req,
                                        httplib::Response &res) {

@@ -6,6 +6,7 @@ filegroup(
         "argparse/argparse.h", 
         "json/json.h",
         "md5/md5.h",
+        "base64/base64.h",
     ]),
     visibility = ["//visibility:public"],
 )
