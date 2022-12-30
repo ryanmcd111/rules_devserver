@@ -31,6 +31,18 @@ std::string GetFileContents(const std::string &path) {
   return content;
 }
 
+std::string GetDevserverLoaderScriptContents(
+    const std::string &workspace_root) {
+  const std::string devserver_loader_path =
+      workspace_root + "devserver/devserver_loader.js";
+  DEBUG_LOG("devserver_loader_path: " << devserver_loader_path);
+
+  std::string devserver_loader_contents;
+  devserver_loader_contents = GetFileContents(devserver_loader_path);
+
+  return devserver_loader_contents;
+}
+
 Arguments ParseArguments(int argc, char **argv) {
   std::string workspace_name = kWorkspaceName;
   args::ArgumentParser parser("This is a test program.",
@@ -107,14 +119,8 @@ int main(int argc, char **argv) {
 
   svr.Get("/devserver_loader.js", [&workspace_root](const httplib::Request &req,
                                                     httplib::Response &res) {
-    const std::string devserver_loader_path =
-        workspace_root + "devserver/devserver_loader.js";
-    DEBUG_LOG("devserver_loader_path: " << devserver_loader_path);
-
-    std::string devserver_loader_contents;
-    devserver_loader_contents = GetFileContents(devserver_loader_path);
-
-    res.set_content(devserver_loader_contents, "text/javascript");
+    res.set_content(GetDevserverLoaderScriptContents(workspace_root),
+                    "text/javascript");
   });
 
   svr.listen(kHost, port);
