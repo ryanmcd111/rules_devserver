@@ -1,14 +1,10 @@
 load("//devserver:defs.bzl", "devserver")
 
-filegroup(
-    name = "index",
-    srcs = ["index.html"],
-    visibility = ["//visibility:public"],
-)
+# exports_files(["index.html"])
 
 devserver(
     name = "serve",
     port = 8081,
-    static_file = ":index",
-    data = [":index"],
+    static_file = "index.html",
+    data = ["index.html"]
 )
