@@ -9,13 +9,20 @@
 
 using bazel::tools::cpp::runfiles::Runfiles;
 
+#define DEBUG true
+#define DEBUG_LOG(msg) \
+  if (DEBUG) std::cout << msg << std::endl;
+
 constexpr char kWorkspaceName[] = "rules_devserver";
 constexpr int kDefaultPort = 8080;
 constexpr char kHost[] = "localhost";
 
-#define DEBUG true
-#define DEBUG_LOG(msg) \
-  if (DEBUG) std::cout << msg << std::endl;
+struct Arguments {
+  int32_t port;
+  std::string static_file;
+  std::string workspace_name;
+  std::string package_name;
+};
 
 std::string GetFileContents(const std::string &path) {
   std::ifstream ifs(path);
@@ -24,15 +31,8 @@ std::string GetFileContents(const std::string &path) {
   return content;
 }
 
-int main(int argc, char **argv) {
-  httplib::Server svr;
-
+Arguments ParseArguments(int argc, char **argv) {
   std::string workspace_name = kWorkspaceName;
-
-  std::string runfiles_error;
-  std::unique_ptr<Runfiles> runfiles(
-      Runfiles::Create(argv[0], BAZEL_CURRENT_REPOSITORY, &runfiles_error));
-
   args::ArgumentParser parser("This is a test program.",
                               "This goes after the options.");
   args::ValueFlag<int32_t> port(parser, "port", "Server port", {"port"},
@@ -66,11 +66,28 @@ int main(int argc, char **argv) {
     DEBUG_LOG("package_name: " << args::get(package_name));
   }
 
+  return Arguments{args::get(port), args::get(static_file), workspace_name,
+                   args::get(package_name)};
+}
+
+int main(int argc, char **argv) {
+  httplib::Server svr;
+
+  std::string runfiles_error;
+  std::unique_ptr<Runfiles> runfiles(
+      Runfiles::Create(argv[0], BAZEL_CURRENT_REPOSITORY, &runfiles_error));
+
+  const Arguments args = ParseArguments(argc, argv);
+  const int32_t port = args.port;
+  const std::string package_name = args.package_name;
+  const std::string static_file = args.static_file;
+  const std::string workspace_name = args.workspace_name;
+
   const std::string workspace_root = runfiles->Rlocation(workspace_name + "/");
   DEBUG_LOG("workspace_root: " << workspace_root << "\n\n");
 
   const std::string static_file_path =
-      workspace_root + args::get(package_name) + "/" + args::get(static_file);
+      workspace_root + package_name + "/" + static_file;
   DEBUG_LOG("static_file_path: " << static_file_path);
 
   std::string static_file_contents;
@@ -100,5 +117,5 @@ int main(int argc, char **argv) {
     res.set_content(devserver_loader_contents, "text/javascript");
   });
 
-  svr.listen(kHost, args::get(port));
+  svr.listen(kHost, port);
 }
