@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
   httplib::Server svr;
 
   std::string workspace_name = kWorkspaceName;
+
   std::string runfiles_error;
   std::unique_ptr<Runfiles> runfiles(
       Runfiles::Create(argv[0], BAZEL_CURRENT_REPOSITORY, &runfiles_error));
@@ -62,13 +63,13 @@ int main(int argc, char **argv) {
     DEBUG_LOG("package_name: " << args::get(package_name));
   }
 
-  std::string path = runfiles->Rlocation(workspace_name + "/");
+  const std::string path = runfiles->Rlocation(workspace_name + "/");
 
-  std::string static_file_contents;
   const std::string static_file_path =
       path + args::get(package_name) + "/" + args::get(static_file);
+  DEBUG_LOG("static_file_path: " << static_file_path);
 
-  DEBUG_LOG("static_file_path: " << static_file_path)
+  std::string static_file_contents;
   static_file_contents = GetFileContents(static_file_path);
   DEBUG_LOG("static_file_contents: " << static_file_contents)
 
