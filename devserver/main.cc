@@ -70,7 +70,7 @@ json ComputeManifest(const PathMap &path_to_contents) {
 std::string GetDevserverLoaderScriptContents(
     const std::string &workspace_root) {
   const std::string devserver_loader_path =
-      kWorkspaceName + "devserver/devserver_loader.js";
+      std::string(kWorkspaceName) + "devserver/devserver_loader.js";
   DEBUG_LOG("devserver_loader_path: " << devserver_loader_path);
 
   std::string devserver_loader_contents;
