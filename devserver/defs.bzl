@@ -11,7 +11,7 @@ def devserver(name, port, static_file, workspace_name, data = []):
             "--workspace_name=%s" % workspace_name,
             "--package_name=%s" % native.package_name(),
         ],
-        data = data,
+        data = data + [Label("@rules_devserver//devserver:devserver_loader")],
         deps = ["@bazel_tools//tools/cpp/runfiles"],
         linkopts = ["-lpthread"],
     )

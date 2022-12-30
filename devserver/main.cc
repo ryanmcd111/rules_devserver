@@ -1,7 +1,10 @@
 #include <iostream>
 
-#include "external/rules_devserver/devserver/argparse/argparse.h"
-#include "external/rules_devserver/devserver/httplib/httplib.h"
+// #include "external/rules_devserver/devserver/argparse/argparse.h"
+// #include "external/rules_devserver/devserver/httplib/httplib.h"
+
+#include "devserver/argparse/argparse.h"
+#include "devserver/httplib/httplib.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 using bazel::tools::cpp::runfiles::Runfiles;
@@ -63,19 +66,38 @@ int main(int argc, char **argv) {
     DEBUG_LOG("package_name: " << args::get(package_name));
   }
 
-  const std::string path = runfiles->Rlocation(workspace_name + "/");
+  const std::string workspace_root = runfiles->Rlocation(workspace_name + "/");
+  DEBUG_LOG("workspace_root: " << workspace_root << "\n\n");
 
   const std::string static_file_path =
-      path + args::get(package_name) + "/" + args::get(static_file);
+      workspace_root + args::get(package_name) + "/" + args::get(static_file);
   DEBUG_LOG("static_file_path: " << static_file_path);
 
   std::string static_file_contents;
   static_file_contents = GetFileContents(static_file_path);
-  DEBUG_LOG("static_file_contents: " << static_file_contents)
 
+  const std::regex re("<\\/head>");
+  const std::string replacement =
+      "<script src=\"/devserver_loader.js\"></script></head>";
+  static_file_contents =
+      std::regex_replace(static_file_contents, re, replacement);
+
+  DEBUG_LOG("static_file_contents: " << static_file_contents);
   svr.Get("/", [&static_file_contents](const httplib::Request &req,
                                        httplib::Response &res) {
     res.set_content(static_file_contents, "text/html");
+  });
+
+  svr.Get("/devserver_loader.js", [&workspace_root](const httplib::Request &req,
+                                                    httplib::Response &res) {
+    const std::string devserver_loader_path =
+        workspace_root + "devserver/devserver_loader.js";
+    DEBUG_LOG("devserver_loader_path: " << devserver_loader_path);
+
+    std::string devserver_loader_contents;
+    devserver_loader_contents = GetFileContents(devserver_loader_path);
+
+    res.set_content(devserver_loader_contents, "text/javascript");
   });
 
   svr.listen(kHost, args::get(port));
