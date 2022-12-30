@@ -2,9 +2,11 @@
 
 // #include "external/rules_devserver/devserver/argparse/argparse.h"
 // #include "external/rules_devserver/devserver/httplib/httplib.h"
+// #include "external/rules_devserver/devserver/json/json.h"
 
 #include "devserver/argparse/argparse.h"
 #include "devserver/httplib/httplib.h"
+#include "devserver/json/json.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 using bazel::tools::cpp::runfiles::Runfiles;
