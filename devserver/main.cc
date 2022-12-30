@@ -116,7 +116,7 @@ json ComputeManifest(const std::map<Path, FileContents> &path_to_contents) {
     char digest[PICOHASH_MD5_DIGEST_LENGTH];
 
     picohash_init_md5(&ctx);
-    picohash_update(&ctx, &contents, contents.size());
+    picohash_update(&ctx, contents.c_str(), contents.size());
     picohash_final(&ctx, digest);
     std::string digest_str(base64_encode(digest, PICOHASH_MD5_DIGEST_LENGTH));
     manifest[path] = digest_str;
