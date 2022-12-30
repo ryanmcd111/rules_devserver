@@ -68,9 +68,10 @@ json ComputeManifest(const PathMap &path_to_contents) {
 }
 
 std::string GetDevserverLoaderScriptContents(
-    const std::string &workspace_root) {
-  const std::string devserver_loader_path =
-      std::string(kWorkspaceName) + "/devserver/devserver_loader.js";
+    const std::string &runfiles_root, const std::string &workspace_root) {
+  const std::string devserver_loader_path = runfiles_root + "/" +
+                                            std::string(kWorkspaceName) +
+                                            "/devserver/devserver_loader.js";
   DEBUG_LOG("devserver_loader_path: " << devserver_loader_path);
 
   std::string devserver_loader_contents;
@@ -136,8 +137,8 @@ PathMap ComputePathMap(const std::string &workspace_root,
 
 Arguments ParseArguments(int argc, char **argv) {
   std::string workspace_name = kWorkspaceName;
-  args::ArgumentParser parser("This is a test program.",
-                              "This goes after the options.");
+  args::ArgumentParser parser("rules_devserver",
+                              "Bazel web development server.");
   args::ValueFlag<int32_t> port(parser, "port", "Server port", {"port"},
                                 kDefaultPort);
   args::ValueFlagList<std::string> static_files(
@@ -166,9 +167,7 @@ Arguments ParseArguments(int argc, char **argv) {
     DEBUG_LOG("workspace_name: " << workspace_name);
   }
 
-  const std::vector<std::string> static_files_list(args::get(static_files));
-
-  return Arguments{args::get(port), static_files_list, workspace_name};
+  return Arguments{args::get(port), args::get(static_files), workspace_name};
 }
 
 int main(int argc, char **argv) {
@@ -183,7 +182,11 @@ int main(int argc, char **argv) {
   const std::vector<std::string> static_files = args.static_files;
   const std::string workspace_name = args.workspace_name;
 
-  const std::string workspace_root = runfiles->Rlocation(workspace_name + "/");
+  std::string workspace_root = runfiles->Rlocation(workspace_name);
+  const std::string runfiles_root =
+      workspace_root.substr(0, workspace_root.find_last_of("/"));
+  workspace_root = workspace_root + "/";
+  DEBUG_LOG("runfiles_root: " << runfiles_root);
   DEBUG_LOG("workspace_root: " << workspace_root << "\n\n");
 
   const PathMap path_map = ComputePathMap(workspace_root, static_files);
@@ -202,12 +205,13 @@ int main(int argc, char **argv) {
       res.set_content(contents, "text/html");
     });
   }
-  svr.Get(
-      "/devserver/devserver_loader.js",
-      [&workspace_root](const httplib::Request &req, httplib::Response &res) {
-        res.set_content(GetDevserverLoaderScriptContents(workspace_root),
-                        "text/javascript");
-      });
+  svr.Get("/devserver/devserver_loader.js",
+          [&runfiles_root, &workspace_root](const httplib::Request &req,
+                                            httplib::Response &res) {
+            res.set_content(
+                GetDevserverLoaderScriptContents(runfiles_root, workspace_root),
+                "text/javascript");
+          });
 
   svr.Get("/devserver/manifest",
           [&manifest](const httplib::Request &req, httplib::Response &res) {
