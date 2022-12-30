@@ -1,4 +1,4 @@
-def devserver(name, port, static_file, data = []):
+def devserver(name, port, static_file, workspace_name, data = []):
     # normalized_static_file = Label(native.repository_name() + "//" + native.package_name()).relative(static_file)
     native.cc_binary(
         name = name,
@@ -8,7 +8,7 @@ def devserver(name, port, static_file, data = []):
         args = [
             "--port=%d" % port, 
             "--static_file=%s" % static_file,
-            "--workspace_name=%s" % native.repository_name(),
+            "--workspace_name=%s" % workspace_name,
             "--package_name=%s" % native.package_name(),
         ],
         data = data,
