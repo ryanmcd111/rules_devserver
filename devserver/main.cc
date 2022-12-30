@@ -3,13 +3,16 @@
 // #include "external/rules_devserver/devserver/argparse/argparse.h"
 // #include "external/rules_devserver/devserver/httplib/httplib.h"
 // #include "external/rules_devserver/devserver/json/json.h"
+// #include "external/rules_devserver/devserver/md5/md5.h"
 
 #include "devserver/argparse/argparse.h"
 #include "devserver/httplib/httplib.h"
 #include "devserver/json/json.h"
+#include "devserver/md5/md5.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 using bazel::tools::cpp::runfiles::Runfiles;
+using ::nlohmann::json;
 
 #define DEBUG true
 #define DEBUG_LOG(msg) \
@@ -33,6 +36,14 @@ std::string GetFileContents(const std::string &path) {
   return content;
 }
 
+json ComputeManifest() {
+  json manifest;
+
+  manifest["manifest"] = {{"/", "123"}};
+
+  return manifest;
+}
+
 std::string GetDevserverLoaderScriptContents(
     const std::string &workspace_root) {
   const std::string devserver_loader_path =
@@ -49,7 +60,7 @@ std::string AddDevserverLoaderToStaticFileContents(
     const std::string &static_file_contents) {
   const std::regex re("<\\/head>");
   const std::string replacement =
-      "<script src=\"/devserver_loader.js\"></script></head>";
+      "<script src=\"/devserver/devserver_loader.js\"></script></head>";
   std::string static_file_contents_with_devserver_loader =
       std::regex_replace(static_file_contents, re, replacement);
 
@@ -135,11 +146,17 @@ int main(int argc, char **argv) {
     res.set_content(static_file_contents, "text/html");
   });
 
-  svr.Get("/devserver_loader.js", [&workspace_root](const httplib::Request &req,
-                                                    httplib::Response &res) {
-    res.set_content(GetDevserverLoaderScriptContents(workspace_root),
-                    "text/javascript");
-  });
+  svr.Get(
+      "/devserver/devserver_loader.js",
+      [&workspace_root](const httplib::Request &req, httplib::Response &res) {
+        res.set_content(GetDevserverLoaderScriptContents(workspace_root),
+                        "text/javascript");
+      });
+
+  svr.Get("/devserver/manifest",
+          [](const httplib::Request &req, httplib::Response &res) {
+            res.set_content(ComputeManifest().dump(), "application/json");
+          });
 
   svr.listen(kHost, port);
 }

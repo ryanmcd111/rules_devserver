@@ -1,6 +1,12 @@
 filegroup(
     name = "main",
-    srcs = glob(["main.cc", "httplib/httplib.h", "argparse/argparse.h", "json/json.h"]),
+    srcs = glob([
+        "main.cc", 
+        "httplib/httplib.h", 
+        "argparse/argparse.h", 
+        "json/json.h",
+        "md5/md5.h",
+    ]),
     visibility = ["//visibility:public"],
 )
 

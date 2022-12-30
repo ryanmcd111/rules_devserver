@@ -14,4 +14,5 @@ def devserver(name, port, static_file, workspace_name, data = []):
         data = data + [Label("@rules_devserver//devserver:devserver_loader")],
         deps = ["@bazel_tools//tools/cpp/runfiles"],
         linkopts = ["-lpthread"],
+        copts = ["-fpermissive"],
     )
