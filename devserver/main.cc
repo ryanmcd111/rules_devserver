@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 // #include "external/rules_devserver/devserver/argparse/argparse.h"
 // #include "external/rules_devserver/devserver/httplib/httplib.h"
@@ -14,7 +15,8 @@
 using bazel::tools::cpp::runfiles::Runfiles;
 using ::nlohmann::json;
 
-#define DEBUG true
+bool DEBUG = false;
+
 #define DEBUG_LOG(msg) \
   if (DEBUG) std::cout << msg << std::endl;
 
@@ -95,6 +97,11 @@ Arguments ParseArguments(int argc, char **argv) {
       {"workspace_name"});
   args::ValueFlag<std::string> package_name(parser, "package_name",
                                             "Package name", {"package_name"});
+  args::ValueFlag<bool> debug(parser, "debug", "Debug mode", {"debug"}, DEBUG);
+
+  // DEBUG = debug;
+  std::cout << "DEBUG: " << DEBUG << std::endl;
+  std::cout << "debug: " << debug << std::endl;
 
   parser.ParseCLI(argc, argv);
 
@@ -140,6 +147,9 @@ int main(int argc, char **argv) {
       GetStaticFileContents(workspace_root, package_name, static_file);
   static_file_contents =
       AddDevserverLoaderToStaticFileContents(static_file_contents);
+
+  const std::map<std::string, std::string> path_to_contents = {{"/", "123"}};
+  const json manifest = ComputeManifest();
 
   svr.Get("/", [&static_file_contents](const httplib::Request &req,
                                        httplib::Response &res) {
