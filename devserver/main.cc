@@ -3,17 +3,17 @@
 #include <sstream>
 #include <vector>
 
-// #include "external/rules_devserver/devserver/argparse/argparse.h"
-// #include "external/rules_devserver/devserver/httplib/httplib.h"
-// #include "external/rules_devserver/devserver/json/json.h"
-// #include "external/rules_devserver/devserver/md5/md5.h"
-// #include "external/rules_devserver/devserver/base64/base64.h"
+#include "external/rules_devserver/devserver/argparse/argparse.h"
+#include "external/rules_devserver/devserver/base64/base64.h"
+#include "external/rules_devserver/devserver/httplib/httplib.h"
+#include "external/rules_devserver/devserver/json/json.h"
+#include "external/rules_devserver/devserver/md5/md5.h"
 
-#include "devserver/argparse/argparse.h"
-#include "devserver/base64/base64.h"
-#include "devserver/httplib/httplib.h"
-#include "devserver/json/json.h"
-#include "devserver/md5/md5.h"
+// #include "devserver/argparse/argparse.h"
+// #include "devserver/base64/base64.h"
+// #include "devserver/httplib/httplib.h"
+// #include "devserver/json/json.h"
+// #include "devserver/md5/md5.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 using bazel::tools::cpp::runfiles::Runfiles;
