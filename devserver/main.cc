@@ -43,6 +43,31 @@ std::string GetDevserverLoaderScriptContents(
   return devserver_loader_contents;
 }
 
+std::string AddDevserverLoaderToStaticFileContents(
+    const std::string &static_file_contents) {
+  const std::regex re("<\\/head>");
+  const std::string replacement =
+      "<script src=\"/devserver_loader.js\"></script></head>";
+  std::string static_file_contents_with_devserver_loader =
+      std::regex_replace(static_file_contents, re, replacement);
+
+  DEBUG_LOG("static_file_contents: " << static_file_contents);
+  return static_file_contents_with_devserver_loader;
+}
+
+std::string GetStaticFileContents(const std::string &workspace_root,
+                                  const std::string &package_name,
+                                  const std::string &static_file) {
+  const std::string static_file_path =
+      workspace_root + package_name + "/" + static_file;
+  DEBUG_LOG("static_file_path: " << static_file_path);
+
+  std::string static_file_contents;
+  static_file_contents = GetFileContents(static_file_path);
+
+  return static_file_contents;
+}
+
 Arguments ParseArguments(int argc, char **argv) {
   std::string workspace_name = kWorkspaceName;
   args::ArgumentParser parser("This is a test program.",
@@ -98,20 +123,11 @@ int main(int argc, char **argv) {
   const std::string workspace_root = runfiles->Rlocation(workspace_name + "/");
   DEBUG_LOG("workspace_root: " << workspace_root << "\n\n");
 
-  const std::string static_file_path =
-      workspace_root + package_name + "/" + static_file;
-  DEBUG_LOG("static_file_path: " << static_file_path);
-
-  std::string static_file_contents;
-  static_file_contents = GetFileContents(static_file_path);
-
-  const std::regex re("<\\/head>");
-  const std::string replacement =
-      "<script src=\"/devserver_loader.js\"></script></head>";
+  std::string static_file_contents =
+      GetStaticFileContents(workspace_root, package_name, static_file);
   static_file_contents =
-      std::regex_replace(static_file_contents, re, replacement);
+      AddDevserverLoaderToStaticFileContents(static_file_contents);
 
-  DEBUG_LOG("static_file_contents: " << static_file_contents);
   svr.Get("/", [&static_file_contents](const httplib::Request &req,
                                        httplib::Response &res) {
     res.set_content(static_file_contents, "text/html");
