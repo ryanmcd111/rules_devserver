@@ -3,17 +3,17 @@
 #include <sstream>
 #include <vector>
 
-#include "external/rules_devserver/devserver/argparse/argparse.h"
-#include "external/rules_devserver/devserver/base64/base64.h"
-#include "external/rules_devserver/devserver/httplib/httplib.h"
-#include "external/rules_devserver/devserver/json/json.h"
-#include "external/rules_devserver/devserver/md5/md5.h"
+// #include "external/rules_devserver/devserver/argparse/argparse.h"
+// #include "external/rules_devserver/devserver/base64/base64.h"
+// #include "external/rules_devserver/devserver/httplib/httplib.h"
+// #include "external/rules_devserver/devserver/json/json.h"
+// #include "external/rules_devserver/devserver/md5/md5.h"
 
-// #include "devserver/argparse/argparse.h"
-// #include "devserver/base64/base64.h"
-// #include "devserver/httplib/httplib.h"
-// #include "devserver/json/json.h"
-// #include "devserver/md5/md5.h"
+#include "devserver/argparse/argparse.h"
+#include "devserver/base64/base64.h"
+#include "devserver/httplib/httplib.h"
+#include "devserver/json/json.h"
+#include "devserver/md5/md5.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 using bazel::tools::cpp::runfiles::Runfiles;
@@ -44,6 +44,90 @@ std::string GetFileContents(const Path &path) {
   std::string content((std::istreambuf_iterator<char>(ifs)),
                       (std::istreambuf_iterator<char>()));
   return content;
+}
+
+std::string ComputeMimeType(const std::string &path) {
+  const std::regex re("\\.([a-zA-Z0-9]+)$");
+  std::smatch match;
+  std::regex_search(path, match, re);
+  std::string mime_type;
+
+  if (match.size() == 2) {
+    const std::string extension = match[1];
+    if (extension == "html") {
+      mime_type = "text/html";
+    } else if (extension == "js") {
+      mime_type = "text/javascript";
+    } else if (extension == "css") {
+      mime_type = "text/css";
+    } else if (extension == "png") {
+      mime_type = "image/png";
+    } else if (extension == "jpg") {
+      mime_type = "image/jpeg";
+    } else if (extension == "gif") {
+      mime_type = "image/gif";
+    } else if (extension == "svg") {
+      mime_type = "image/svg+xml";
+    } else if (extension == "ico") {
+      mime_type = "image/x-icon";
+    } else if (extension == "json") {
+      mime_type = "application/json";
+    } else if (extension == "txt") {
+      mime_type = "text/plain";
+    } else if (extension == "xml") {
+      mime_type = "text/xml";
+    } else if (extension == "pdf") {
+      mime_type = "application/pdf";
+    } else if (extension == "zip") {
+      mime_type = "application/zip";
+    } else if (extension == "gz") {
+      mime_type = "application/gzip";
+    } else if (extension == "tar") {
+      mime_type = "application/x-tar";
+    } else if (extension == "wav") {
+      mime_type = "audio/wav";
+    } else if (extension == "mp3") {
+      mime_type = "audio/mpeg";
+    } else if (extension == "mp4") {
+      mime_type = "video/mp4";
+    } else if (extension == "webm") {
+      mime_type = "video/webm";
+    } else if (extension == "ogg") {
+      mime_type = "audio/ogg";
+    } else if (extension == "ogv") {
+      mime_type = "video/ogg";
+    } else if (extension == "flac") {
+      mime_type = "audio/flac";
+    } else if (extension == "woff") {
+      mime_type = "font/woff";
+    } else if (extension == "woff2") {
+      mime_type = "font/woff2";
+    } else if (extension == "ttf") {
+      mime_type = "font/ttf";
+    } else if (extension == "eot") {
+      mime_type = "font/eot";
+    } else if (extension == "otf") {
+      mime_type = "font/otf";
+    } else if (extension == "map") {
+      mime_type = "application/json";
+    } else if (extension == "woff") {
+      mime_type = "font/woff";
+    } else if (extension == "woff2") {
+      mime_type = "font/woff2";
+    } else if (extension == "ttf") {
+      mime_type = "font/ttf";
+    } else if (extension == "eot") {
+      mime_type = "font/eot";
+    } else if (extension == "otf") {
+      mime_type = "font/otf";
+    } else if (extension == "map") {
+      mime_type = "application/json";
+    } else {
+      mime_type = "application/octet-stream";
+    }
+  }
+
+  return mime_type;
 }
 
 json ComputeManifest(const PathMap &path_to_contents) {
@@ -202,7 +286,7 @@ int main(int argc, char **argv) {
                                            httplib::Response &res) {
       DEBUG_LOG("path: " << path << "\n");
       DEBUG_LOG("contents: " << contents << "\n\n");
-      res.set_content(contents, "text/html");
+      res.set_content(contents, ComputeMimeType(path));
     });
   }
   svr.Get("/devserver/devserver_loader.js",
