@@ -37,5 +37,5 @@ def devserver(name, port, static_files, workspace_name, debug = False, data = []
         deps = ["@bazel_tools//tools/cpp/runfiles"],
         linkopts = ["-lpthread"],
         copts = ["-fpermissive", "-w"],
-        includes = ["@rules_devserver//devserver"],
+        includes = ["@rules_devserver//devserver", "."],
     )

@@ -24,7 +24,7 @@ using FileContents = std::string;
 
 using PathMap = std::map<Path, FileContents>;
 
-bool DEBUG = true;
+bool DEBUG = false;
 
 #define DEBUG_LOG(msg) \
   if (DEBUG) std::cout << msg << std::endl;
