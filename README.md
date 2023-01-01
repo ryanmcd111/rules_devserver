@@ -7,6 +7,7 @@ use.
 ## Features
 
 *   Live-reload via `ibazel` and a custom live-reload script.
+*   Hot swappable JavaScript modules.
 *   Custom routes for any dependency in the BUILD rule's `data` attribute.
 
 ## Pre-requisites
@@ -68,3 +69,13 @@ ibazel run //:serve
 ```
 
 Whenever a file in the `data` attribute is changed, the server will be live-reloaded.
+
+## Hot Swap JavaScript Modules.
+
+To hot swap a JavaScript module, add the a data attribute on the `<script>` tag in the HTML file. For example:
+
+```
+<script type="module" data-hot-swap="true" src="/scripts/bundle.js"></script>
+```
+
+When the server is live-reloaded, the browser will hot swap the JavaScript module, and the hot page itself will not reload.
