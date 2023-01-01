@@ -14,6 +14,7 @@ use.
 
 * Bazel 6.0.0 or higher
 * ibazel for live-reload
+* Linux. This rule has not been tested on other operating systems.
 
 ## Setup
 
@@ -25,8 +26,8 @@ workspace(name = "test_rules_devserver")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "rules_devserver",
-    strip_prefix = "rules_devserver-0.1.0",
-    urls = ["https://github.com/ryanmcdermott/rules_devserver/archive/refs/tags/0.1.0.tar.gz"],
+    strip_prefix = "rules_devserver-0.2.0",
+    urls = ["https://github.com/ryanmcdermott/rules_devserver/archive/refs/tags/0.2.0.tar.gz"],
 )
 ```
 
@@ -70,7 +71,7 @@ ibazel run //:serve
 
 Whenever a file in the `data` attribute is changed, the server will be live-reloaded.
 
-## Hot Swap JavaScript Modules.
+## Hot Swap JavaScript Modules
 
 To hot swap a JavaScript module, add the a data attribute on the `<script>` tag in the HTML file. For example:
 
@@ -78,4 +79,4 @@ To hot swap a JavaScript module, add the a data attribute on the `<script>` tag 
 <script type="module" data-hot-swap="true" src="/scripts/bundle.js"></script>
 ```
 
-When the server is live-reloaded, the browser will hot swap the JavaScript module, and the hot page itself will not reload.
+When the server is live-reloaded, the browser will hot swap the JavaScript module, and the host page itself will not reload.
